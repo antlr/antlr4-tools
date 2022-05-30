@@ -42,8 +42,8 @@ JSONLexer.py     JSONListener.py  JSONParser.py    JSONVisitor.py
 
 ```bash
 $ antlr4-parse /Users/parrt/sample/JavaLexer.g4 /Users/parrt/sample/JavaParser.g4 compilationUnit -profile dump.csv T.java
-critter:master:~/antlr/code/antlr4-tools $ open /tmp/dump.csv 
-critter:master:~/antlr/code/antlr4-tools $ head -5 /tmp/dump.csv 
+$ open /tmp/dump.csv 
+$ head -5 /tmp/dump.csv 
 Rule,Invocations,Time (ms),Total k,Max k,Ambiguities,DFA cache miss
 compilationUnit:0,1,0.164791,1,1,0,1
 compilationUnit:1,42,1.106583,42,1,0,2
