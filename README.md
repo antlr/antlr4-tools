@@ -41,7 +41,7 @@ JSONLexer.py     JSONListener.py  JSONParser.py    JSONVisitor.py
 ## Parsing using interpreter
 
 ```bash
-$ antlr4-parse /Users/parrt/sample/JavaLexer.g4 /Users/parrt/sample/JavaParser.g4 compilationUnit -profile dump.csv T.java
+$ antlr4-parse JavaLexer.g4 JavaParser.g4 compilationUnit -profile dump.csv T.java
 $ open /tmp/dump.csv 
 $ head -5 /tmp/dump.csv 
 Rule,Invocations,Time (ms),Total k,Max k,Ambiguities,DFA cache miss
