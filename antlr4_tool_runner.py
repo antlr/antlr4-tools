@@ -117,16 +117,24 @@ def tool():
     out = out.decode("UTF-8")
     err = err.decode("UTF-8")
 
-    if err: print(err)
-    if out: print(out)
+    if err: print(err, end='')
+    if out: print(out, end='')
 
 
-def prof():
+def interp():
     """Entry point to run antlr4 profiling using grammar and input file"""
     args = sys.argv[1:]
     args, version = get_version_arg(args)
     jar, java = install_jre_and_antlr(version)
 
+    p = subprocess.Popen([java, '-cp', jar, 'org.antlr.v4.gui.Interpreter']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    out = out.decode("UTF-8")
+    err = err.decode("UTF-8")
+
+    if err: print(err, end='')
+    if out: print(out, end='')
+
 
 if __name__ == '__main__':
-    tool()
+    interp()
