@@ -21,6 +21,23 @@ ANTLR Parser Generator  Version 4.10.1
 ...
 ```
 
+```bash
+$ antlr4 -v 4.9.3
+ANTLR Parser Generator  Version 4.9.3
+ -o ___              specify output directory where all output is generated
+ -lib ___            specify location of grammars, tokens files
+...
+```
+
+```bash
+$ antlr4 JSON.g4 
+$ ls JSON*.java
+JSONBaseListener.java  JSONLexer.java         JSONListener.java      JSONParser.java
+$ antlr4 -Dlanguage=Python3 -visitor JSON.g4
+$ ls JSON*.py
+JSONLexer.py     JSONListener.py  JSONParser.py    JSONVisitor.py
+```
+
 ## Parsing using interpreter
 
 ```bash
