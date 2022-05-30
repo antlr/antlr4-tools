@@ -11,6 +11,12 @@ That creates `antlr4` and `antlr4-parse` executables.
 
 Requires ANTLR 4.10.2 and above for `antlr4-parse` but any version for `antlr4` command.  (Use `antlr-parse -v 4.10.2-SNAPSHOT ...` until 4.10.2 is released.)
 
+Save [this jar](https://oss.sonatype.org/content/repositories/snapshots/org/antlr/antlr4/4.10.2-SNAPSHOT/antlr4-4.10.2-20220530.193833-1-complete.jar) to this dir:
+
+```
+/Users/parrt/.m2/repository/org/antlr/antlr4/4.10.2-SNAPSHOT/
+```
+
 ## Running ANTLR tool on grammars
 
 ```bash
