@@ -20,6 +20,8 @@ ANTLR Parser Generator  Version 4.10.1
 ...
 ```
 
+The only extra argument that the `antlr4` command provides over the actual ANTLR tool commands is `-v`, which has to be the first argument:
+
 ```bash
 $ antlr4 -v 4.9.3
 ANTLR Parser Generator  Version 4.9.3
@@ -71,3 +73,5 @@ consume [@1,3:3=';',<1>,1:3] rule a
 exit    a, LT(1)=<EOF>
 exit    expr, LT(1)=<EOF>
 ```
+
+The only extra argument that the `antlr4-parse` command provides over the actual ANTLR tool commands is `-v`, which has to be the first argument.
