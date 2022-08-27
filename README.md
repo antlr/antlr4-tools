@@ -1,21 +1,14 @@
 # antlr4-tools
-Tools to run antlr4 w/o needing to install java or antlr4!
 
+Tools to run antlr4 w/o needing to install java or antlr4! The only requirement is Python3, which is typically installed on all developer machines on all operating systems. 
+ 
 ## Install
 
 ```bash
 $ pip install antlr4-tools
 ```
 
-That creates `antlr4` and `antlr4-parse` executables.
-
-Requires ANTLR 4.10.2 and above for `antlr4-parse` but any version for `antlr4` command.  (Use `antlr-parse -v 4.10.2-SNAPSHOT ...` until 4.10.2 is released.)
-
-Save [this jar](https://oss.sonatype.org/content/repositories/snapshots/org/antlr/antlr4/4.10.2-SNAPSHOT/antlr4-4.10.2-20220530.193833-1-complete.jar) to this dir:
-
-```
-/Users/parrt/.m2/repository/org/antlr/antlr4/4.10.2-SNAPSHOT/
-```
+That creates `antlr4` and `antlr4-parse` executables. On Windows, of course, this doesn't just work. You need to add the `...\local-packages\python38\scripts` dir to your `PATH`, which itself might require a fun reboot or perhaps reinstall of the OS. haha.
 
 ## Running ANTLR tool on grammars
 
@@ -46,8 +39,15 @@ JSONLexer.py     JSONListener.py  JSONParser.py    JSONVisitor.py
 
 ## Parsing using interpreter
 
+The `antlr4-parse` command requires ANTLR 4.11 and above (but any version of ANTLR works for the plain `antlr4` command).  Use `antlr-parse -v 4.11-SNAPSHOT ...` until 4.11 is released, which unfortunately you have to do manually until then.  Save [this jar](https://oss.sonatype.org/content/repositories/snapshots/org/antlr/antlr4/4.11-SNAPSHOT/antlr4-4.11-20220827.174020-1-complete.jar) to this dir:
+
+```
+/Users/parrt/.m2/repository/org/antlr/antlr4/4.11-SNAPSHOT/
+```
+
+
 ```bash
-$ antlr4-parse -v 4.10.2-SNAPSHOT JavaLexer.g4 JavaParser.g4 compilationUnit -profile dump.csv T.java
+$ antlr4-parse -v 4.11-SNAPSHOT JavaLexer.g4 JavaParser.g4 compilationUnit -profile dump.csv T.java
 $ open /tmp/dump.csv 
 $ head -5 /tmp/dump.csv 
 Rule,Invocations,Time (ms),Total k,Max k,Ambiguities,DFA cache miss
@@ -58,7 +58,7 @@ compilationUnit:3,1,3.969,1,1,0,1
 ```
 
 ```bash
-$ antlr4-parse -v 4.10.2-SNAPSHOT TParser.g4 TLexer.g4 expr -tokens -trace
+$ antlr4-parse -v 4.11-SNAPSHOT TParser.g4 TLexer.g4 expr -tokens -trace
 abc;
 [@0,0:2='abc',<ID>,1:0]
 [@1,3:3=';',<';'>,1:3]
