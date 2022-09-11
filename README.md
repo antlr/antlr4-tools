@@ -10,6 +10,21 @@ $ pip install antlr4-tools
 
 That creates `antlr4` and `antlr4-parse` executables. On Windows, of course, this doesn't just work. You need to add the `...\local-packages\python38\scripts` dir to your `PATH`, which itself might require a fun reboot or perhaps reinstall of the OS. haha.
 
+## First run will install Java and ANTLR
+
+If needed, `antlr4` will download and install Java 11 and the latest ANTLR jar:
+
+```bash
+$ antlr4 
+Downloading antlr4-4.11.1-complete.jar
+ANTLR tool needs Java to run; install Java JRE 11 yes/no (default yes)? y
+Installed Java in /Users/parrt/.jre/jdk-11.0.15+10-jre; remove that dir to uninstall
+ANTLR Parser Generator  Version 4.11.1
+ -o ___              specify output directory where all output is generated
+ -lib ___            specify location of grammars, tokens files
+...
+```
+
 ## Running ANTLR tool on grammars
 
 ```bash
@@ -41,15 +56,75 @@ JSONLexer.py     JSONListener.py  JSONParser.py    JSONVisitor.py
 
 ## Parsing using interpreter
 
-The `antlr4-parse` command requires ANTLR 4.11 and above (but any version of ANTLR works for the plain `antlr4` command).  Use `antlr-parse -v 4.11-SNAPSHOT ...` until 4.11 is released, which unfortunately you have to do manually until then.  Save [this jar](https://oss.sonatype.org/content/repositories/snapshots/org/antlr/antlr4/4.11-SNAPSHOT/antlr4-4.11-20220827.174020-1-complete.jar) to this dir:
+The `antlr4-parse` command requires ANTLR 4.11 and above (but any version of ANTLR works for the plain `antlr4` command).  The only extra argument that the `antlr4-parse` command provides over the actual ANTLR `org.antlr.v4.gui.Interpreter` "command" is `-v`, which has to be the first argument.  (Note: `^D` means control-D and indicates "end of input" on Unix but use `^Z` on Windows.)
+
+Let's play with a simple grammar:
 
 ```
-/Users/parrt/.m2/repository/org/antlr/antlr4/4.11-SNAPSHOT/
+grammar Expr;		
+prog:	expr EOF ;
+expr:	expr ('*'|'/') expr
+    |	expr ('+'|'-') expr
+    |	INT
+    |	'(' expr ')'
+    ;
+NEWLINE : [\r\n]+ -> skip;
+INT     : [0-9]+ ;
 ```
 
+To parse and get the parse tree in text form, use:
 
 ```bash
-$ antlr4-parse -v 4.11-SNAPSHOT JavaLexer.g4 JavaParser.g4 compilationUnit -profile dump.csv T.java
+$ antlr4-parse Expr.g4 prog -tree
+10+20*30
+^D
+(prog:1 (expr:2 (expr:3 10) + (expr:1 (expr:3 20) * (expr:3 30))) <EOF>)
+```
+
+Here's how to get the tokens and trace through the parse:
+
+```bash
+$ antlr4-parse Expr.g4 prog -tokens -trace
+10+20*30
+[@0,0:1='10',<INT>,1:0]
+[@1,2:2='+',<'+'>,1:2]
+[@2,3:4='20',<INT>,1:3]
+[@3,5:5='*',<'*'>,1:5]
+[@4,6:7='30',<INT>,1:6]
+[@5,9:8='<EOF>',<EOF>,2:0]
+enter   prog, LT(1)=10
+enter   expr, LT(1)=10
+consume [@0,0:1='10',<8>,1:0] rule expr
+enter   expr, LT(1)=+
+consume [@1,2:2='+',<3>,1:2] rule expr
+enter   expr, LT(1)=20
+consume [@2,3:4='20',<8>,1:3] rule expr
+enter   expr, LT(1)=*
+consume [@3,5:5='*',<1>,1:5] rule expr
+enter   expr, LT(1)=30
+consume [@4,6:7='30',<8>,1:6] rule expr
+exit    expr, LT(1)=<EOF>
+exit    expr, LT(1)=<EOF>
+exit    expr, LT(1)=<EOF>
+consume [@5,9:8='<EOF>',<-1>,2:0] rule prog
+exit    prog, LT(1)=<EOF>
+```
+
+Here's how to get a visual tree view:
+
+```bash
+$ antlr4-parse Expr.g4 prog -gui
+10+20*30
+```
+
+The following will pop up in a Java-based GUI window:
+
+<img src="images/parse-tree.png" width="300">
+
+On real grammars, it can be useful to get decision-making profiling info:
+
+```bash
+$ antlr4-parse JavaLexer.g4 JavaParser.g4 compilationUnit -profile dump.csv T.java
 $ open /tmp/dump.csv 
 $ head -5 /tmp/dump.csv 
 Rule,Invocations,Time (ms),Total k,Max k,Ambiguities,DFA cache miss
@@ -59,19 +134,3 @@ compilationUnit:2,2,1.73675,2,1,0,2
 compilationUnit:3,1,3.969,1,1,0,1
 ```
 
-```bash
-$ antlr4-parse -v 4.11-SNAPSHOT TParser.g4 TLexer.g4 expr -tokens -trace
-abc;
-[@0,0:2='abc',<ID>,1:0]
-[@1,3:3=';',<';'>,1:3]
-[@2,4:4='\n',<WS>,channel=1,1:4]
-[@3,5:4='<EOF>',<EOF>,2:0]
-enter   expr, LT(1)=abc
-enter   a, LT(1)=abc
-consume [@0,0:2='abc',<2>,1:0] rule a
-consume [@1,3:3=';',<1>,1:3] rule a
-exit    a, LT(1)=<EOF>
-exit    expr, LT(1)=<EOF>
-```
-
-The only extra argument that the `antlr4-parse` command provides over the actual ANTLR tool commands is `-v`, which has to be the first argument.
