@@ -10,6 +10,16 @@ import json
 import jdk  # requires install-jdk package
 
 
+mvn_repo: str
+homedir: Path
+
+
+def initialize_paths():
+    global mvn_repo, homedir
+    homedir = Path.home()
+    mvn_repo = os.path.join(homedir, '.m2', 'repository', 'org', 'antlr', 'antlr4')
+
+
 def latest_version():
     with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr") as response:
         s = response.read().decode("UTF-8")
@@ -77,10 +87,6 @@ def install_jre(java_version='11'):
 
 
 def install_jre_and_antlr(version):
-    global mvn_repo, homedir
-    homedir = Path.home()
-    mvn_repo = os.path.join(homedir, '.m2', 'repository', 'org', 'antlr', 'antlr4')
-
     jar = antlr4_jar(version)
     java = which("java")
     if java is None:
@@ -108,6 +114,7 @@ def get_version_arg(args):
 
 def tool():
     """Entry point to run antlr4 tool itself"""
+    initialize_paths()
     args = sys.argv[1:]
     args, version = get_version_arg(args)
     jar, java = install_jre_and_antlr(version)
@@ -123,6 +130,7 @@ def tool():
 
 def interp():
     """Entry point to run antlr4 profiling using grammar and input file"""
+    initialize_paths()
     args = sys.argv[1:]
     args, version = get_version_arg(args)
     jar, java = install_jre_and_antlr(version)
