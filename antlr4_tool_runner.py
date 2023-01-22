@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import subprocess
 from shutil import which
 from pathlib import Path
@@ -10,15 +11,36 @@ import json
 import jdk  # requires install-jdk package
 
 
+mvn_repo: str
+homedir: Path
+
+
+def initialize_paths():
+    global mvn_repo, homedir
+    homedir = Path.home()
+    mvn_repo = os.path.join(homedir, '.m2', 'repository', 'org', 'antlr', 'antlr4')
+
+
 def latest_version():
-    with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr") as response:
-        s = response.read().decode("UTF-8")
-        searchResult = json.loads(s)['response']
-        # searchResult = s.json()['response']
-        antlr_info = searchResult['docs'][0]
-        # print(json.dump(searchResult))
-        latest = antlr_info['latestVersion']
-        return latest
+    try:
+        with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr") as response:
+            s = response.read().decode("UTF-8")
+            searchResult = json.loads(s)['response']
+            # searchResult = s.json()['response']
+            antlr_info = searchResult['docs'][0]
+            # print(json.dump(searchResult))
+            latest = antlr_info['latestVersion']
+            return latest
+    except error.URLError as e:
+        print("Could not get latest version number, attempting to fall back to latest downloaded version...")
+        version_dirs = list(filter(lambda directory: re.match(r"[0-9]+\.[0-9]+\.[0-9]+", directory), os.listdir(mvn_repo)))
+        version_dirs.sort(reverse=True)
+        if len(version_dirs) == 0:
+            raise FileNotFoundError("Could not find a previously downloaded antlr4 jar")
+        else:
+            latest_version_dir = version_dirs.pop()
+            print(f"Found version '{latest_version_dir}', this version may be out of date")
+            return latest_version_dir
 
 def antlr4_jar(version):
     jar = os.path.join(mvn_repo, version, f'antlr4-{version}-complete.jar')
@@ -77,10 +99,6 @@ def install_jre(java_version='11'):
 
 
 def install_jre_and_antlr(version):
-    global mvn_repo, homedir
-    homedir = Path.home()
-    mvn_repo = os.path.join(homedir, '.m2', 'repository', 'org', 'antlr', 'antlr4')
-
     jar = antlr4_jar(version)
     java = which("java")
     if java is None:
@@ -108,6 +126,7 @@ def get_version_arg(args):
 
 def tool():
     """Entry point to run antlr4 tool itself"""
+    initialize_paths()
     args = sys.argv[1:]
     args, version = get_version_arg(args)
     jar, java = install_jre_and_antlr(version)
@@ -123,6 +142,7 @@ def tool():
 
 def interp():
     """Entry point to run antlr4 profiling using grammar and input file"""
+    initialize_paths()
     args = sys.argv[1:]
     args, version = get_version_arg(args)
     jar, java = install_jre_and_antlr(version)
