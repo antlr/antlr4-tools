@@ -127,35 +127,23 @@ def process_args():
     )
 
 
-def tool():
-    """Entry point to run antlr4 tool itself"""
+def run_cli(entrypoint):
     initialize_paths()
     args, version = process_args()
     jar, java = install_jre_and_antlr(version)
 
-    p = subprocess.Popen([java, '-cp', jar, 'org.antlr.v4.Tool']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    out = out.decode("UTF-8")
-    err = err.decode("UTF-8")
+    cp = subprocess.run([java, '-cp', jar, entrypoint]+args)
+    sys.exit(cp.returncode)
 
-    if err: print(err, end='')
-    if out: print(out, end='')
+
+def tool():
+    """Entry point to run antlr4 tool itself"""
+    run_cli('org.antlr.v4.Tool')
 
 
 def interp():
     """Entry point to run antlr4 profiling using grammar and input file"""
-    initialize_paths()
-    args = sys.argv[1:]
-    args, version = process_args(args)
-    jar, java = install_jre_and_antlr(version)
-
-    p = subprocess.Popen([java, '-cp', jar, 'org.antlr.v4.gui.Interpreter']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    out = out.decode("UTF-8")
-    err = err.decode("UTF-8")
-
-    if err: print(err, end='')
-    if out: print(out, end='')
+    run_cli('org.antlr.v4.gui.Interpreter')
 
 
 if __name__ == '__main__':
