@@ -58,7 +58,6 @@ def download_antlr4(jar, version):
             s = response.read()
     except error.URLError as e:
         print(f"Could not find antlr4-{version}-complete.jar at maven.org")
-        ResponseData = e.read().decode("utf8", 'ignore')
 
     if s is None:
         return None
