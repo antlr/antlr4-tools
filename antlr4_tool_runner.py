@@ -23,7 +23,7 @@ def initialize_paths():
 
 def latest_version():
     try:
-        with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr") as response:
+        with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr", timeout=10) as response:
             s = response.read().decode("UTF-8")
             searchResult = json.loads(s)['response']
             # searchResult = s.json()['response']
@@ -52,7 +52,7 @@ def antlr4_jar(version):
 def download_antlr4(jar, version):
     s = None
     try:
-        with urlopen(f"https://repo1.maven.org/maven2/org/antlr/antlr4/{version}/antlr4-{version}-complete.jar") as response:
+        with urlopen(f"https://repo1.maven.org/maven2/org/antlr/antlr4/{version}/antlr4-{version}-complete.jar", timeout=60) as response:
             print(f"Downloading antlr4-{version}-complete.jar")
             os.makedirs(os.path.join(mvn_repo, version), exist_ok=True)
             s = response.read()
