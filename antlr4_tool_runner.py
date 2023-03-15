@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import re
@@ -113,21 +114,23 @@ def install_jre_and_antlr(version):
     return jar, java
 
 
-def get_version_arg(args):
-    version = None
-    if len(args) > 0 and args[0] == '-v':
-        version = args[1]
-        args = args[2:]
-    if version is None:
-        version = latest_version()
-    return args, version
+def process_args():
+    parser = argparse.ArgumentParser(
+        add_help=False, usage="%(prog)s [-v VERSION] [%(prog)s options]"
+    )
+    # Note, that the space after `-v` is needed so we don't pick up other arguments begining with `v`, like `-visitor`
+    parser.add_argument("-v ", dest="version", default=None)
+    args, unparsed_args = parser.parse_known_args()
+
+    return unparsed_args, (
+        args.version or os.environ.get("ANTLR4_TOOLS_ANTLR_VERSION") or latest_version()
+    )
 
 
 def tool():
     """Entry point to run antlr4 tool itself"""
     initialize_paths()
-    args = sys.argv[1:]
-    args, version = get_version_arg(args)
+    args, version = process_args()
     jar, java = install_jre_and_antlr(version)
 
     p = subprocess.Popen([java, '-cp', jar, 'org.antlr.v4.Tool']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -143,7 +146,7 @@ def interp():
     """Entry point to run antlr4 profiling using grammar and input file"""
     initialize_paths()
     args = sys.argv[1:]
-    args, version = get_version_arg(args)
+    args, version = process_args(args)
     jar, java = install_jre_and_antlr(version)
 
     p = subprocess.Popen([java, '-cp', jar, 'org.antlr.v4.gui.Interpreter']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

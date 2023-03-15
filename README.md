@@ -41,17 +41,7 @@ ANTLR Parser Generator  Version 4.11.1
 ...
 ```
 
-## Running ANTLR tool on grammars
-
-```bash
-$ antlr4
-ANTLR Parser Generator  Version 4.10.1
- -o ___              specify output directory where all output is generated
- -lib ___            specify location of grammars, tokens files
-...
-```
-
-The only extra argument that the `antlr4` command provides over the actual ANTLR tool commands is `-v`, which has to be the first argument:
+To override the version of ANTLR jar used, you can pass a `-v <version>` argument or set `ANTLR4_TOOLS_ANTLR_VERSION` environment variable:
 
 ```bash
 $ antlr4 -v 4.9.3
@@ -59,7 +49,16 @@ ANTLR Parser Generator  Version 4.9.3
  -o ___              specify output directory where all output is generated
  -lib ___            specify location of grammars, tokens files
 ...
+$ ANTLR4_TOOLS_ANTLR_VERSION=4.10.1 antlr4
+ANTLR Parser Generator  Version 4.10.1
+ -o ___              specify output directory where all output is generated
+ -lib ___            specify location of grammars, tokens files
+...
 ```
+
+## Running ANTLR tool on grammars
+
+The `antlr4` command forwards all arguments (besides `-v` mentioned above) to the actual ANTLR tool command:
 
 ```bash
 $ antlr4 JSON.g4 
@@ -72,12 +71,12 @@ JSONLexer.py     JSONListener.py  JSONParser.py    JSONVisitor.py
 
 ## Parsing using interpreter
 
-The `antlr4-parse` command requires ANTLR 4.11 and above (but any version of ANTLR works for the plain `antlr4` command).  The only extra argument that the `antlr4-parse` command provides over the actual ANTLR `org.antlr.v4.gui.Interpreter` "command" is `-v`, which has to be the first argument.  (Note: `^D` means control-D and indicates "end of input" on Unix but use `^Z` on Windows.)
+The `antlr4-parse` command requires ANTLR 4.11 and above (but any version of ANTLR works for the plain `antlr4` command).  It accepts the same `-v` argument or environment variable to override the ANTLR jar version used.  (Note: `^D` means control-D and indicates "end of input" on Unix but use `^Z` on Windows.)
 
 Let's play with a simple grammar:
 
 ```
-grammar Expr;		
+grammar Expr;
 prog:	expr EOF ;
 expr:	expr ('*'|'/') expr
     |	expr ('+'|'-') expr
