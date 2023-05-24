@@ -131,7 +131,7 @@ def tool():
     args, version = get_version_arg(args)
     jar, java = install_jre_and_antlr(version)
 
-    p = subprocess.Popen([java, '-cp', jar, 'org.antlr.v4.Tool']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen([java, '-Dfile.encoding=UTF-8', '-cp', jar, 'org.antlr.v4.Tool']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     out = out.decode("UTF-8")
     err = err.decode("UTF-8")
