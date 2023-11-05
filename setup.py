@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-v = '0.2'
+v = '0.2.1'
 
 setup(
     name='antlr4-tools',
