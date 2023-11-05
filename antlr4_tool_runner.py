@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import re
@@ -23,7 +24,7 @@ def initialize_paths():
 
 def latest_version():
     try:
-        with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr") as response:
+        with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr", timeout=10) as response:
             s = response.read().decode("UTF-8")
             searchResult = json.loads(s)['response']
             # searchResult = s.json()['response']
@@ -52,13 +53,12 @@ def antlr4_jar(version):
 def download_antlr4(jar, version):
     s = None
     try:
-        with urlopen(f"https://repo1.maven.org/maven2/org/antlr/antlr4/{version}/antlr4-{version}-complete.jar") as response:
+        with urlopen(f"https://repo1.maven.org/maven2/org/antlr/antlr4/{version}/antlr4-{version}-complete.jar", timeout=60) as response:
             print(f"Downloading antlr4-{version}-complete.jar")
             os.makedirs(os.path.join(mvn_repo, version), exist_ok=True)
             s = response.read()
     except (error.URLError, error.HTTPError) as e:
         print(f"Could not find antlr4-{version}-complete.jar at maven.org")
-        ResponseData = e.read().decode("utf8", 'ignore')
 
     if s is None:
         return None
@@ -114,46 +114,36 @@ def install_jre_and_antlr(version):
     return jar, java
 
 
-def get_version_arg(args):
-    version = None
-    if len(args) > 0 and args[0] == '-v':
-        version = args[1]
-        args = args[2:]
-    if version is None:
-        version = latest_version()
-    return args, version
+def process_args():
+    parser = argparse.ArgumentParser(
+        add_help=False, usage="%(prog)s [-v VERSION] [%(prog)s options]"
+    )
+    # Note, that the space after `-v` is needed so we don't pick up other arguments begining with `v`, like `-visitor`
+    parser.add_argument("-v ", dest="version", default=None)
+    args, unparsed_args = parser.parse_known_args()
+
+    return unparsed_args, (
+        args.version or os.environ.get("ANTLR4_TOOLS_ANTLR_VERSION") or latest_version()
+    )
+
+
+def run_cli(entrypoint):
+    initialize_paths()
+    args, version = process_args()
+    jar, java = install_jre_and_antlr(version)
+
+    cp = subprocess.run([java, '-cp', jar, entrypoint]+args)
+    sys.exit(cp.returncode)
 
 
 def tool():
     """Entry point to run antlr4 tool itself"""
-    initialize_paths()
-    args = sys.argv[1:]
-    args, version = get_version_arg(args)
-    jar, java = install_jre_and_antlr(version)
-
-    p = subprocess.Popen([java, '-cp', jar, 'org.antlr.v4.Tool']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    out = out.decode("UTF-8")
-    err = err.decode("UTF-8")
-
-    if err: print(err, end='')
-    if out: print(out, end='')
+    run_cli('org.antlr.v4.Tool')
 
 
 def interp():
     """Entry point to run antlr4 profiling using grammar and input file"""
-    initialize_paths()
-    args = sys.argv[1:]
-    args, version = get_version_arg(args)
-    jar, java = install_jre_and_antlr(version)
-
-    p = subprocess.Popen([java, '-cp', jar, 'org.antlr.v4.gui.Interpreter']+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    out = out.decode("UTF-8")
-    err = err.decode("UTF-8")
-
-    if err: print(err, end='')
-    if out: print(out, end='')
+    run_cli('org.antlr.v4.gui.Interpreter')
 
 
 if __name__ == '__main__':
