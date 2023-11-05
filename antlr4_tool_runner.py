@@ -31,7 +31,7 @@ def latest_version():
             # print(json.dump(searchResult))
             latest = antlr_info['latestVersion']
             return latest
-    except error.URLError as e:
+    except (error.URLError, error.HTTPError) as e:
         print("Could not get latest version number, attempting to fall back to latest downloaded version...")
         version_dirs = list(filter(lambda directory: re.match(r"[0-9]+\.[0-9]+\.[0-9]+", directory), os.listdir(mvn_repo)))
         version_dirs.sort(reverse=True)
@@ -56,7 +56,7 @@ def download_antlr4(jar, version):
             print(f"Downloading antlr4-{version}-complete.jar")
             os.makedirs(os.path.join(mvn_repo, version), exist_ok=True)
             s = response.read()
-    except error.URLError as e:
+    except (error.URLError, error.HTTPError) as e:
         print(f"Could not find antlr4-{version}-complete.jar at maven.org")
         ResponseData = e.read().decode("utf8", 'ignore')
 
