@@ -11,7 +11,6 @@ import json
 
 import jdk  # requires install-jdk package
 
-
 mvn_repo: str
 homedir: Path
 
@@ -24,7 +23,8 @@ def initialize_paths():
 
 def latest_version():
     try:
-        with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr", timeout=10) as response:
+        with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr",
+                     timeout=10) as response:
             s = response.read().decode("UTF-8")
             searchResult = json.loads(s)['response']
             # searchResult = s.json()['response']
@@ -32,7 +32,7 @@ def latest_version():
             # print(json.dump(searchResult))
             latest = antlr_info['latestVersion']
             return latest
-    except (error.URLError, error.HTTPError) as e:
+    except (error.URLError, error.HTTPError, TimeoutError):
         print("Could not get latest version number, attempting to fall back to latest downloaded version...")
         version_dirs = list(filter(lambda directory: re.match(r"[0-9]+\.[0-9]+\.[0-9]+", directory), os.listdir(mvn_repo)))
         version_dirs.sort(reverse=True)
@@ -42,6 +42,7 @@ def latest_version():
             latest_version_dir = version_dirs.pop()
             print(f"Found version '{latest_version_dir}', this version may be out of date")
             return latest_version_dir
+
 
 def antlr4_jar(version):
     jar = os.path.join(mvn_repo, version, f'antlr4-{version}-complete.jar')
@@ -53,11 +54,12 @@ def antlr4_jar(version):
 def download_antlr4(jar, version):
     s = None
     try:
-        with urlopen(f"https://repo1.maven.org/maven2/org/antlr/antlr4/{version}/antlr4-{version}-complete.jar", timeout=60) as response:
+        with urlopen(f"https://repo1.maven.org/maven2/org/antlr/antlr4/{version}/antlr4-{version}-complete.jar",
+                     timeout=60) as response:
             print(f"Downloading antlr4-{version}-complete.jar")
             os.makedirs(os.path.join(mvn_repo, version), exist_ok=True)
             s = response.read()
-    except (error.URLError, error.HTTPError) as e:
+    except (error.URLError, error.HTTPError, TimeoutError):
         print(f"Could not find antlr4-{version}-complete.jar at maven.org")
 
     if s is None:
@@ -86,7 +88,7 @@ def install_jre(java_version='11'):
                 return java
 
     r = input(f"ANTLR tool needs Java to run; install Java JRE 11 yes/no (default yes)? ")
-    if r.strip().lower() not in {'yes','y',''}:
+    if r.strip().lower() not in {'yes', 'y', ''}:
         exit(1)
     install_dir = jdk.install(java_version, jre=True)
     print(f"Installed Java in {install_dir}; remove that dir to uninstall")
@@ -118,12 +120,12 @@ def process_args():
     parser = argparse.ArgumentParser(
         add_help=False, usage="%(prog)s [-v VERSION] [%(prog)s options]"
     )
-    # Note, that the space after `-v` is needed so we don't pick up other arguments begining with `v`, like `-visitor`
+    # Note, that the space after `-v` is needed, so we don't pick up other arguments beginning with `v`, like `-visitor`
     parser.add_argument("-v ", dest="version", default=None)
     args, unparsed_args = parser.parse_known_args()
 
     return unparsed_args, (
-        args.version or os.environ.get("ANTLR4_TOOLS_ANTLR_VERSION") or latest_version()
+            args.version or os.environ.get("ANTLR4_TOOLS_ANTLR_VERSION") or latest_version()
     )
 
 
@@ -132,7 +134,7 @@ def run_cli(entrypoint):
     args, version = process_args()
     jar, java = install_jre_and_antlr(version)
 
-    cp = subprocess.run([java, '-cp', jar, entrypoint]+args)
+    cp = subprocess.run([java, '-cp', jar, entrypoint] + args)
     sys.exit(cp.returncode)
 
 
