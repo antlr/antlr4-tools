@@ -23,7 +23,7 @@ def initialize_paths():
 
 def latest_version():
     try:
-        with urlopen(f"https://search.maven.org/solrsearch/select?q=a:antlr4-master+g:org.antlr",
+        with urlopen("https://central.sonatype.com/solrsearch/select?q=a:antlr4-master+g:org.antlr",
                      timeout=10) as response:
             s = response.read().decode("UTF-8")
             searchResult = json.loads(s)['response']
