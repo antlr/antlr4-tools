@@ -1,5 +1,12 @@
 from setuptools import setup, find_packages
 
+# To RELEASE:
+#
+# $ pip install --upgrade build setuptools wheel twine  # update tools
+# $ rm -rf dist build *.egg-info
+# $ python -m build
+# $ twine upload dist/*
+
 v = '0.2.2'
 
 setup(
@@ -10,7 +17,7 @@ setup(
         "install-jdk"
     ],
     url='http://www.antlr.org',
-    license='BSD',
+    license='MIT',
     author='Terence Parr',
     author_email='parrt@antlr.org',
     entry_points={'console_scripts': [
@@ -18,5 +25,7 @@ setup(
         'antlr4-parse=antlr4_tool_runner:interp'
     ]
     },
-    description='Tools to run ANTLR4 tool and grammar interpreter/profiler'
+    description='Tools to run ANTLR4 tool and grammar interpreter/profiler',
+    classifiers=['License :: OSI Approved :: MIT License',
+                 'Intended Audience :: Developers']
 )
